@@ -2,7 +2,7 @@ from django.contrib.staticfiles.finders import get_finders
 from django.core.exceptions import MiddlewareNotUsed
 from staticutils.versioning import get_file_version
 
-asset_version = {}
+asset_versions = {}
 
 class AssetVersioningMiddleware(object):
     """
@@ -15,5 +15,5 @@ class AssetVersioningMiddleware(object):
     def __init__(self):
         for finder in get_finders():
             for path, storage in finder.list([]):
-                asset_version[path] = get_file_version(path, storage)
+                asset_versions[path] = get_file_version(path, storage)
         raise MiddlewareNotUsed
