@@ -40,7 +40,7 @@ class OverwritableFileSystemStorage(FileSystemStorage):
                 content.close()
 
             else:
-                fd = os.open(full_path, os.O_WRONLY | os.O_CREAT |
+                fd = os.open(full_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC |
                     getattr(os, 'O_BINARY', 0))
                 try:
                     locks.lock(fd, locks.LOCK_EX)
