@@ -3,7 +3,7 @@ from optparse import make_option
 from django.contrib.staticfiles.finders import get_finders
 from django.core.files.base import ContentFile
 from django.core.files.storage import get_storage_class
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 from django.utils.encoding import smart_str
 from django.utils.importlib import import_module
 from staticutils import settings
@@ -15,9 +15,9 @@ def process(name, content, processors):
         content = processor(name, content)
     return content
 
-class Command(NoArgsCommand):
-    can_import_settings = True
-    option_list = NoArgsCommand.option_list + (
+class Command(BaseCommand):
+    args = '<package package ...>'
+    option_list = BaseCommand.option_list + (
         make_option('-i', '--ignore', action='append', default=[],
             dest='ignore_patterns', metavar='PATTERN',
             help="Ignore files or directories matching this glob-style "
@@ -34,7 +34,7 @@ class Command(NoArgsCommand):
             help="Do NOT postprocess package contents."),
     )
 
-    def handle_noargs(self, **options):
+    def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.preprocess = options['preprocess']
         self.postprocess = options['postprocess']
@@ -51,6 +51,9 @@ class Command(NoArgsCommand):
             files.update(dict(finder.list(ignore_patterns=self.ignore_patterns) or []))
 
         for package, patterns in settings.STATIC_PACKAGES.items():
+            if args and not any((fnmatch.fnmatch(package, pattern) for pattern in args)):
+                continue
+
             names = []
             for pattern in patterns:
                 if hasattr(pattern, 'search'):
