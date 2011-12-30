@@ -8,6 +8,12 @@ from django.utils.encoding import smart_str
 from django.utils.importlib import import_module
 from staticutils import settings
 
+def unique(seq):
+    """
+    Uniquifies a sequence (not in place), without altering the sequence order.
+    """
+    return reduce(lambda x, y: x if y in x else x + [y], seq, [])
+
 def process(name, content, processors):
     for location in processors:
         module, callable = location.rsplit('.', 1)
@@ -63,7 +69,7 @@ class Command(BaseCommand):
                     matches = fnmatch.filter(files.keys(), pattern)
                 names.extend(matches)
 
-            names = set(names) # don't include the same file twice in the same package
+            names = unique(names) # don't include the same file twice in the same package
             file_count = len(names)
             self.log('Creating static package: %s (%s %s)' % (package,
                 file_count, file_count == 1 and "file" or "files"), level=1)
